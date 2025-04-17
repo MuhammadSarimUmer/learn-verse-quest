@@ -31,7 +31,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // API base URL
 const API_URL = 'http://localhost:5000/api';
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
   const [loading, setLoading] = useState<boolean>(true);
@@ -64,6 +64,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       } catch (err) {
         console.error('Error fetching user data:', err);
+        // Mock user data for development if API is unavailable
+        if (process.env.NODE_ENV !== 'production') {
+          setUser({
+            id: 'mock-user-id',
+            username: 'devuser',
+            email: 'dev@example.com',
+            level: 5,
+            xp: 2500,
+            streak: 7
+          });
+          setIsAuthenticated(true);
+          toast.info("Using mock user data for development");
+        }
       } finally {
         setLoading(false);
       }
@@ -96,20 +109,57 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       localStorage.setItem('token', data.token);
       setToken(data.token);
       
-      // Fetch user data
-      const userResponse = await fetch(`${API_URL}/auth/me`, {
-        headers: {
-          'x-auth-token': data.token
+      try {
+        // Fetch user data
+        const userResponse = await fetch(`${API_URL}/auth/me`, {
+          headers: {
+            'x-auth-token': data.token
+          }
+        });
+        
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          setUser(userData);
+          setIsAuthenticated(true);
+          toast.success("Login successful!");
         }
-      });
-      
-      if (userResponse.ok) {
-        const userData = await userResponse.json();
-        setUser(userData);
-        setIsAuthenticated(true);
-        toast.success("Login successful!");
+      } catch (fetchErr) {
+        console.error('Error fetching user data after login:', fetchErr);
+        // Mock user data for development if API is unavailable
+        if (process.env.NODE_ENV !== 'production') {
+          setUser({
+            id: 'mock-user-id',
+            username: email.split('@')[0],
+            email: email,
+            level: 1,
+            xp: 0,
+            streak: 0
+          });
+          setIsAuthenticated(true);
+          toast.info("Using mock user data for development");
+        }
       }
     } catch (err) {
+      if (process.env.NODE_ENV !== 'production') {
+        // For development: create mock login when backend is unavailable
+        console.log('Using mock login for development');
+        const mockToken = 'mock-token-' + Date.now();
+        localStorage.setItem('token', mockToken);
+        setToken(mockToken);
+        setUser({
+          id: 'mock-user-id',
+          username: email.split('@')[0],
+          email: email,
+          level: 1,
+          xp: 0,
+          streak: 0
+        });
+        setIsAuthenticated(true);
+        toast.info("Mock login successful (development mode)");
+        setLoading(false);
+        return;
+      }
+      
       if (err instanceof Error) {
         setError(err.message);
         toast.error(err.message);
@@ -147,20 +197,59 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       localStorage.setItem('token', data.token);
       setToken(data.token);
       
-      // Fetch user data
-      const userResponse = await fetch(`${API_URL}/auth/me`, {
-        headers: {
-          'x-auth-token': data.token
+      try {
+        // Fetch user data
+        const userResponse = await fetch(`${API_URL}/auth/me`, {
+          headers: {
+            'x-auth-token': data.token
+          }
+        });
+        
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          setUser(userData);
+          setIsAuthenticated(true);
+          toast.success("Registration successful!");
         }
-      });
-      
-      if (userResponse.ok) {
-        const userData = await userResponse.json();
-        setUser(userData);
-        setIsAuthenticated(true);
-        toast.success("Registration successful!");
+      } catch (fetchErr) {
+        console.error('Error fetching user data after registration:', fetchErr);
+        // Mock user data for development if API is unavailable
+        if (process.env.NODE_ENV !== 'production') {
+          setUser({
+            id: 'mock-user-id',
+            username: username,
+            email: email,
+            name: name,
+            level: 1,
+            xp: 0,
+            streak: 0
+          });
+          setIsAuthenticated(true);
+          toast.info("Using mock user data for development");
+        }
       }
     } catch (err) {
+      if (process.env.NODE_ENV !== 'production') {
+        // For development: create mock registration when backend is unavailable
+        console.log('Using mock registration for development');
+        const mockToken = 'mock-token-' + Date.now();
+        localStorage.setItem('token', mockToken);
+        setToken(mockToken);
+        setUser({
+          id: 'mock-user-id',
+          username: username,
+          email: email,
+          name: name,
+          level: 1,
+          xp: 0,
+          streak: 0
+        });
+        setIsAuthenticated(true);
+        toast.info("Mock registration successful (development mode)");
+        setLoading(false);
+        return;
+      }
+      
       if (err instanceof Error) {
         setError(err.message);
         toast.error(err.message);
