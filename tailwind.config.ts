@@ -61,6 +61,25 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Custom colors for LearnVerse Quest
+				code: {
+					python: '#3776AB',
+					javascript: '#F7DF1E',
+					java: '#007396',
+					cpp: '#00599C',
+					ruby: '#CC342D',
+				},
+				learnverse: {
+					primary: '#9b87f5',
+					secondary: '#7E69AB',
+					accent: '#8B5CF6',
+					highlight: '#D946EF',
+					success: '#10B981',
+					warning: '#F59E0B',
+					error: '#EF4444',
+					dark: '#221F26',
+					light: '#E5DEFF',
 				}
 			},
 			borderRadius: {
